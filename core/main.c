@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include "parser.h"
+#include <string.h>
 
 void print_ln(char c) {
 
@@ -20,7 +21,9 @@ char get_prefix(char cmd[]) {
 void cmd_check(char cmd[]) {
     //char pref = get_prefix(cmd);
     //printf("%c", pref);
-    
+    if (strcmp(cmd, "HelloWorld") == 0) {
+        printf("Hi back");
+    }
 }
 
 int main(int argc, char const *argv[])
@@ -37,22 +40,23 @@ int main(int argc, char const *argv[])
         
         
         //printf("%c", c);
-        if (c != '\n') {
+        /*if (c != '\n') {
             cmd[cmd_size] = c;
             printf("%s", cmd);
-        }
+        }*/
 
         if(c == '\n') {
             //Clean string
-            cmd[cmd_size] = '\0';
-            //cmd_check(cmd);
-            printf("Entered command: %s\n", cmd);
+            cmd[cmd_size - 1] = '\0';
+            printf("Entered command: '%s'\n", cmd);
+            cmd_check(cmd);
             //next prompt
             printf("->");
             cmd_size = 0; //reset counter
         
         }
         c = getchar();
+        cmd[cmd_size] = c;
         cmd_size++;
     }
     
