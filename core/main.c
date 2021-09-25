@@ -1,38 +1,51 @@
 #include <stdio.h>
 #include <stdlib.h>
-#include "parser.h"
+//#include "parser.h"
 #include <string.h>
 
 void print_ln(char c) {
 
 }
 
-int first_index_of(char *str, char key) {
+int first_index_of(char *str, char key) {//index begins at 1
     char *e = strchr(str, key);
-    return (int) (e - str) + 1;
-}
-
-int string_indexof(char *token,char s){ //index of char in str
-    if (!token || s=='\0')
-        return 0;
-
-    for (;*token; token++)
-        if (*token == s)
-            return 1;
-
-    return 0;
-}
-
-int get_prefix(char cmd[]) { //get command prefix before (), return corresponding cmd code
-    char prefix[64];
-    char key = '(';
-    int index = string_indexof(&key, *cmd);
-    printf("index: %d", index);
-    for (int i = 0; i < index; i++) {
-        prefix[i] = cmd[i];
+    int ans = (int) (e - str) + 1;
+    if (ans >=0 && ans <= strlen(str)) { //catch key not found
+        return ans;
+    } else {
+        return -1;
     }
-    //printf("Command: %c\n", prefix[0]);
-    if (strcmp(prefix, "print") == 0) {
+}
+
+int last_index_of(char *str, char key) {
+    char *e = strrchr(str, key);
+    int ans = (int) (e - str) + 1;
+    if (ans >=0 && ans <= strlen(str)) { //catch key not found
+        return ans;
+    } else {
+        return -1;
+    }
+}
+
+char* substring(char* str, int begin, int end) { //incluse
+    char *substr;
+    substr = malloc(sizeof(char) * 64);
+    for (int i = begin; i <= end; i++) {
+        substr[i - begin] = *(str + begin);
+        str++;
+    }
+    return substr;
+}
+
+int get_command(char cmd[]) { //get command prefix before (), return corresponding cmd code
+    char *command;
+    char key = '(';
+    int index = first_index_of(cmd, key);
+    //printf("beginning index: %d", index);   
+    command = substring(cmd, 0, index - 2);
+    //printf("Command: %s", command);
+    if (strcmp(command, "print") == 0) {
+        //printf("Print op\n");
         return 1; //print code
     }
     return 0; //incorrect syntax
@@ -42,25 +55,23 @@ int get_prefix(char cmd[]) { //get command prefix before (), return correspondin
 
 void printer(char cmd[]) {
     //get inbetween () for print function
-    char key = '(';
-    int index = string_indexof(&key, *cmd);
-    printf("index: %d", index);
-    char content[64];
-    for (int i = index; i < strlen(cmd) - index; i++) {
-        content[i - index] = cmd[i]; 
-    }
-    printf("%s", content);
+    char paren_begin = '(';
+    char paren_end = ')';
+    int index1 = first_index_of(cmd, paren_begin);
+    int index2 = last_index_of(cmd, paren_end);
+    char * content = substring(cmd, index1, index2 - 2);
+    printf("%s\n", content);
 }
 
 void cmd_check(char cmd[]) { //get command code & pass to execution function
     int pref;
-    pref = get_prefix(cmd);
+    pref = get_command(cmd);
     //printf("Entered command: '%s'\nPrefix: %d", cmd, pref);
     printf("%c", pref);
     if (strcmp(cmd, "HelloWorld") == 0) {
         printf("Hi back");
     } if (pref == 1) {
-        printf("cmd code: 1 - print");
+        //printf("cmd code: 1 - print");
         printer(cmd);
     }
 }

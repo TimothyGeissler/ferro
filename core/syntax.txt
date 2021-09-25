@@ -1,0 +1,7 @@
+MAIN SYNTAX GROUPS
+
+Print: print("string to print") | print(45) 
+
+Variables: int num = 7 
+
+For Loop: for int i = 5, i < 10, i++ 
