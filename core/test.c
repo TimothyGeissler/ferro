@@ -58,5 +58,17 @@ int main(int argc, char const *argv[])
     int last_index = last_index_of(cmd, key_end);
     char *data = substring(cmd, index_par, last_index - 2);
     printf("contents: %s", data);
+
+    char* num = "6";
+    int res;
+    sscanf(num, "%d", &res);
+    printf("Converted: %d\n", res);
+
+
+    char *string = "\"hello\"";
+    char quote = '"';
+    printf("%d, %d, %ld\n", first_index_of(string, '"'), last_index_of(string, '"'), strlen(string));
+    
+    printf("%c\n", quote);
     return 0;
 }
