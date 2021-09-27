@@ -2,6 +2,13 @@ MAIN SYNTAX GROUPS
 
 Print: print("string to print") | print(45) 
 
-Variables: int(var,val)
+Variables: 
+- int(var,val)
+- memlist()
+- rem(var) / rem(@addr)
 
 For Loop: for int i = 5, i < 10, i++ 
+
+I/O:
+- read(file.txt)
+- exec(script.fe)

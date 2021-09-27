@@ -45,30 +45,35 @@ char* substring(char* str, int begin, int end) { //incluse
     return substr;
 }
 
-int get_command(char cmd[]) { //get command prefix before (), return corresponding cmd code
+int get_command(char *cmd, int is_from_file) { //get command prefix before (), return corresponding cmd code
     char *command;
-    char key = '(';
-    int index = first_index_of(cmd, key);
+    int index = first_index_of(cmd, '(');
     //printf("beginning index: %d", index);   
+    if (is_from_file = 1) {
+        //modified offset
+        cmd = substring(cmd, 0, strlen(cmd) - 1);
+    } 
     command = substring(cmd, 0, index - 2);
-    //printf("Command: %s", command);
+    //printf("Command: '%s'\n", command);
     if (strcmp(command, "print") == 0) {
         //printf("Print op\n");
         return 1; //print code
     } else if (strcmp(command, "int") == 0) {
         return 2; //store int
+    } else if (strcmp(command, "memlist") == 0) {
+        return 3; //list all memory adresses
+    } else if (strcmp(command, "rem") == 0) {
+        return 4; //delete mem from heap
+    } else if (strcmp(command, "read") == 0) {
+        return 5; //read file
+    } else if (strcmp(command, "exec") == 0) {
+        return 6; //execute file
     }
     return 0; //incorrect syntax
 }
 
-void print_sys() {
-    for (int i = 0; i < sys_counter; i++) {
-        printf("Index: %d, Type: %d, Name: %s\n", sys[i].index, sys[i].type_code, sys[i].name);
-    }
-}
 
-
-char* get_contents_paren(char cmd[], char paren_begin, char paren_end) {
+char* get_contents_paren(char *cmd, char paren_begin, char paren_end) {
     //get inbetween ()
     //char paren_begin = '(';
     //char paren_end = ')';
@@ -78,7 +83,8 @@ char* get_contents_paren(char cmd[], char paren_begin, char paren_end) {
     return content;
 }
 
-void printer(char cmd[]) {
+
+void printer(char *cmd) {
     //get inbetween () for print function
     char *content = get_contents_paren(cmd, '(', ')');
 
@@ -111,7 +117,7 @@ void printer(char cmd[]) {
     
 }
 
-void assign_int(char cmd[]) {
+void assign_int(char *cmd) {
     //get contents of ()
     char *content = get_contents_paren(cmd, '(', ')');
     //get variable name
@@ -130,28 +136,122 @@ void assign_int(char cmd[]) {
     integer_list[int_counter] = value;
     sys_counter++;
     int_counter++;
-    print_sys();
 }
 
-void cmd_check(char cmd[]) { //get command code & pass to execution function
+//work on formatting
+void memlist() {
+    for (int i = 0; i < sys_counter; i++) {
+        printf("Addr: %d\t Type: %d Var: %s\t Val:%d\n", sys[i].index, sys[i].type_code, sys[i].name,  integer_list[sys[i].index]);
+    }
+}
+
+void rem_mem(char *cmd) {
+    //get contents of rem
+    char *cont = get_contents_paren(cmd, '(', ')');
+    int is_addr = first_index_of(cont, '@');
+    if (is_addr == -1) {
+        //not an address, var name = cont
+        
+    } else {
+        //is an address
+
+    }
+
+}
+
+char *read_file(char *file_name) {
+    char *buffer; //file buffer of 1024 bytes
+    FILE *file;
+    file = fopen(file_name, "r");
+    size_t in_read;
+    int display;
+    char line_builder[64] = {};
+    int count = 0;
+    char done_code[6] = "--end";
+
+    while (1) {
+        display = fgetc(file);
+        if (display == EOF) {
+            //empty file
+            break;
+        }
+        if (feof(file)) {
+            break;
+        }
+        char ch = (char) display;
+        if (display != 10) {
+            line_builder[count] = ch;
+        }
+        if (display == 10) {
+            //EOL reached
+            //line_builder[count] = '\0';
+            
+        }
+        if (strcmp(line_builder, done_code) == 0) {
+            break;
+        }
+        
+        count++;
+    }
+    buffer = line_builder;
+    fclose(file);
+
+    /*if (file) {
+        while ((in_read == fread(buffer, 1, sizeof buffer, file)) > 0) {
+            //fwrite(buffer, 1, in_read, stdout);
+            printf("%s\n", fread(buffer, 1, sizeof buffer, file));
+        }
+        if (ferror(file)) {
+            printf("Error reading file %s\n", file_name);
+        }
+        fclose(file);
+    }*/
+    //printf("File Buffer: '%s'\n", buffer);
+    return buffer;
+}
+
+void cmd_check(char *cmd, int is_from_file);
+
+void exec_from_file(char *filename) {
+    char *line = read_file(filename);
+    
+    //line[strlen(line) - 1] = "\0"; //Remove EOL char
+    char* commd = "print(\"HI from fe\")";
+    //printf("Command from file: '%s'\n", commd);
+
+    
+
+    cmd_check(commd, 1);
+}
+
+void cmd_check(char *cmd, int is_from_file) { //get command code & pass to execution function
     int pref;
-    pref = get_command(cmd);
+    pref = get_command(cmd, is_from_file);
     //printf("Entered command: '%s'\nPrefix: %d", cmd, pref);
-    printf("%c", pref);
-    if (strcmp(cmd, "HelloWorld") == 0) {
-        printf("Hi back");
-    } if (pref == 1) {
+    //printf("Pref: %d\n", pref);
+    if (pref == 0) {
+        printf("Incorrect Syntax");
+    } else if (pref == 1) {
         //printf("cmd code: 1 - print");
         printer(cmd);
     } else if (pref == 2) {
         assign_int(cmd);
+    } else if (pref == 3) {
+        memlist();
+    } else if (pref == 4) {
+        rem_mem(cmd);  
+    } else if (pref == 5) {
+        read_file(get_contents_paren(cmd, '(', ')'));
+    } else if (pref == 6) {
+        exec_from_file(get_contents_paren(cmd, '(', ')'));
     }
 }
 
 int main(int argc, char const *argv[]) {
     integer_list = (int*) malloc(sizeof(int) * 256); //reserve space for 256 ints
 
-    char cmd[64];
+    char *cmd = malloc(64 * sizeof(char));
+    //char cmd[64];
     
     //printf("\n-> ");
 
@@ -171,7 +271,7 @@ int main(int argc, char const *argv[]) {
         if(c == '\n') {
             //Clean string
             cmd[cmd_size - 1] = '\0';
-            cmd_check(cmd);
+            cmd_check(cmd, 0);
             //next prompt
             printf("->");
             cmd_size = 0; //reset counter
@@ -181,6 +281,7 @@ int main(int argc, char const *argv[]) {
         cmd[cmd_size] = c;
         cmd_size++;
     }
+    free(cmd);
     
     return 0;
 }
