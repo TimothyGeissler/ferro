@@ -49,7 +49,7 @@ int get_command(char *cmd, int is_from_file) { //get command prefix before (), r
     char *command;
     int index = first_index_of(cmd, '(');
     //printf("beginning index: %d", index);   
-    if (is_from_file = 1) {
+    if (is_from_file == 1) {
         //modified offset
         cmd = substring(cmd, 0, strlen(cmd) - 1);
     } 
@@ -96,7 +96,6 @@ void printer(char *cmd) {
     } else {
         //is a var
         //search sys
-        int found = 0;
         //*fix segfault when uninit. var is called*
         for (int i = 0; i < 256; i++) {
             if (strcmp(sys[i].name, content) == 0) {
@@ -104,14 +103,12 @@ void printer(char *cmd) {
                 if (sys[i].type_code == 0) {
                     //is an int
                     printf("%d\n", integer_list[sys[i].index]);
-                    found = 1;
                 }
                 break;
             }
         }
-        if (found == 0) {
-            printf("Variable not initialized");
-        }
+        printf("Variable not initialized");
+    
     }
 
     
@@ -256,6 +253,8 @@ int main(int argc, char const *argv[]) {
     //printf("\n-> ");
 
     int cmd_size = 0;
+
+    int startup = 1;
     
     char c = '\n';
 
@@ -275,7 +274,6 @@ int main(int argc, char const *argv[]) {
             //next prompt
             printf("->");
             cmd_size = 0; //reset counter
-        
         }
         c = getchar();
         cmd[cmd_size] = c;
